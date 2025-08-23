@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class SocketClientInteractive {
@@ -41,8 +43,23 @@ public class SocketClientInteractive {
         // Slanje poruka
         OutputStream out = socket.getOutputStream();
         while (true) {
-            String text = scanner.nextLine();
-            SocketMessages msg = new SocketMessages(name, text);
+            System.out.print("Poruka (ili @user1,@user2: text): ");
+            String input = scanner.nextLine();
+
+            List<String> to = null;
+            String text = input;
+
+            // ako poruka počinje sa @ -> multicast
+            if (input.startsWith("@")) {
+                int idx = input.indexOf(":");
+                if (idx > 0) {
+                    String usersPart = input.substring(1, idx); // user1,user2
+                    to = Arrays.asList(usersPart.split(","));
+                    text = input.substring(idx + 1).trim();
+                }
+            }
+
+            SocketMessages msg = new SocketMessages(name, text, to);
             byte[] data = KryoUtil.serialize(msg);
             out.write(data);
             out.flush();

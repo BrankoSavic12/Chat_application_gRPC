@@ -1,16 +1,19 @@
 package rs.raf.pds.v4.z5.socket;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class SocketMessages implements Serializable {
     private String from;
     private String text;
+    private List<String> to; // null ili "*" za broadcast, lista korisnika za multicast
 
     public SocketMessages() {}
 
-    public SocketMessages(String from, String text) {
+    public SocketMessages(String from, String text, List<String> to) {
         this.from = from;
         this.text = text;
+        this.to = to;
     }
 
     public String getFrom() {
@@ -21,8 +24,15 @@ public class SocketMessages implements Serializable {
         return text;
     }
 
+    public List<String> getTo() {
+        return to;
+    }
+
     @Override
     public String toString() {
-        return from + ": " + text;
+        if (to == null || to.isEmpty()) {
+            return "[BROADCAST] " + from + ": " + text;
+        }
+        return "[TO " + to + "] " + from + ": " + text;
     }
 }
