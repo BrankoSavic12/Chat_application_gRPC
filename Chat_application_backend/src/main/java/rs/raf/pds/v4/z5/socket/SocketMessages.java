@@ -6,7 +6,7 @@ import java.util.List;
 public class SocketMessages implements Serializable {
     private String from;
     private String text;
-    private List<String> to; // null ili "*" za broadcast, lista korisnika za multicast
+    private List<String> to; // null ili prazno = broadcast, 1 korisnik = 1-1, više korisnika = multicast
 
     public SocketMessages() {}
 
@@ -32,7 +32,10 @@ public class SocketMessages implements Serializable {
     public String toString() {
         if (to == null || to.isEmpty()) {
             return "[BROADCAST] " + from + ": " + text;
+        } else if (to.size() == 1) {
+            return "[PRIVATE to " + to.get(0) + "] " + from + ": " + text;
+        } else {
+            return "[MULTICAST to " + to + "] " + from + ": " + text;
         }
-        return "[TO " + to + "] " + from + ": " + text;
     }
 }

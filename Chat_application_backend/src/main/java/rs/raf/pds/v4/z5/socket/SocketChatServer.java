@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SocketChatServer {
 
@@ -64,7 +63,7 @@ public class SocketChatServer {
                 }
             }
         } else {
-            // multicast samo specificiranim korisnicima
+            // multicast ili 1-1
             for (String user : msg.getTo()) {
                 Socket c = clients.get(user);
                 if (c != null && !c.equals(sender)) {

@@ -43,17 +43,17 @@ public class SocketClientInteractive {
         // Slanje poruka
         OutputStream out = socket.getOutputStream();
         while (true) {
-            System.out.print("Poruka (ili @user1,@user2: text): ");
+            System.out.print("Poruka (npr. Hello ili @user: Hi ili @user1,user2: Hi): ");
             String input = scanner.nextLine();
 
             List<String> to = null;
             String text = input;
 
-            // ako poruka počinje sa @ -> multicast
+            // ako poruka počinje sa @ -> private ili multicast
             if (input.startsWith("@")) {
                 int idx = input.indexOf(":");
                 if (idx > 0) {
-                    String usersPart = input.substring(1, idx); // user1,user2
+                    String usersPart = input.substring(1, idx); // user ili user1,user2
                     to = Arrays.asList(usersPart.split(","));
                     text = input.substring(idx + 1).trim();
                 }
