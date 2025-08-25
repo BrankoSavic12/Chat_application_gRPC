@@ -207,7 +207,59 @@ public class SocketChatServer {
         deliverGroupMessage(saved);
     }
 
-   
+    private void handleEdit(Connection conn, CEditMessage m) {
+        String from = sessionOr(conn2user.get(conn), m.fromUser);
+        StoredMessage updated = null;
+
+        if ("#broadcast".equals(m.room)) {
+            updated = repo.editBroadcastMessage(m.id, from, m.newText);
+        } else if ("#multicast".equals(m.room)) {
+            updated = repo.editMulticastMessage(m.id, from, m.newText);
+        } else if (m.room != null && !m.room.isEmpty()) {
+            updated = repo.editRoomMessage(m.room, m.id, from, m.newText);
+        } else {
+            StoredMessage orig = repo.findDMByIdGlobal(m.id);
+            if (orig != null) {
+                String partner = extractPartnerFromKey(orig.getRoom(), from);
+                updated = repo.editDMMessage(from, partner, m.id, from, m.newText);
+            }
+        }
+
+        if (updated == null) return;
+
+        SDeliverEditedMessage out = new SDeliverEditedMessage();
+        out.id = updated.getId();
+        out.room = updated.getRoom();
+        out.fromUser = from;
+        out.text = updated.getText();
+        out.tsEpochMs = updated.getTs();
+        out.edited = true;
+        out.replyToId = updated.getReplyToId();
+        out.replyExcerpt = updated.getReplyExcerpt();
+
+        if ("#broadcast".equals(updated.getRoom())) {
+            for (Connection target : user2conn.values()) target.sendTCP(out);
+        } else if ("#multicast".equals(updated.getRoom())) {
+            for (String u : repo.getMulticastRecipients(updated.getId())) {
+                Connection t = user2conn.get(u);
+                if (t != null) t.sendTCP(out);
+            }
+            Connection f = user2conn.get(from);
+            if (f != null) f.sendTCP(out);
+        } else if (updated.getRoom() != null && updated.getRoom().contains("|")) {
+            String[] parts = updated.getRoom().split("\\|");
+            for (String u : parts) {
+                Connection t = user2conn.get(u);
+                if (t != null) t.sendTCP(out);
+            }
+        } else {
+            Set<String> members = roomMembers.getOrDefault(updated.getRoom(), Set.of());
+            for (String member : members) {
+                Connection target = user2conn.get(member);
+                if (target != null) target.sendTCP(out);
+            }
+        }
+    }
 
     // --------- utils ----------
     private static String normUser(String u) {

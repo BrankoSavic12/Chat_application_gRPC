@@ -104,8 +104,28 @@ public class ChatRepository {
         return null;
     }
 
-    
-    
+    public StoredMessage editMessage(String room, long id, String editor, String newText) {
+        Deque<StoredMessage> dq = roomMessages.get(roomKey(room));
+        if (dq == null) return null;
+
+        List<StoredMessage> list = new ArrayList<>(dq);
+        for (int i = 0; i < list.size(); i++) {
+            StoredMessage m = list.get(i);
+            if (m.getId() == id && m.getFromUser().equals(normUser(editor))) {
+                StoredMessage edited = StoredMessage.newBuilder(m)
+                        .setText(newText)
+                        .setEdited(true)
+                        .setTs(System.currentTimeMillis())
+                        .build();
+                list.set(i, edited);
+                dq.clear();
+                dq.addAll(list);
+                return edited;
+            }
+        }
+        return null;
+    }
+
     // ----------------- DM -----------------
     public StoredMessage appendDM(String fromUser, String toUser, String text) {
         String key = dmKey(fromUser, toUser);

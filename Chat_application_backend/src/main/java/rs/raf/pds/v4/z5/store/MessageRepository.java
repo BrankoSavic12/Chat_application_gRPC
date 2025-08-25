@@ -67,6 +67,22 @@ public class MessageRepository {
                 .stream().filter(m -> m.getId() == id).findFirst().orElse(null);
     }
 
+    public StoredMessage editRoomMessage(String room, long id, String editor, String newText) {
+        List<StoredMessage> msgs = roomMessages.getOrDefault(room, Collections.emptyList());
+        for (int i = 0; i < msgs.size(); i++) {
+            StoredMessage m = msgs.get(i);
+            if (m.getId() == id && m.getFromUser().equals(normalize(editor))) {
+                StoredMessage edited = StoredMessage.newBuilder(m)
+                        .setText(newText)
+                        .setEdited(true)
+                        .setTs(System.currentTimeMillis())
+                        .build();
+                msgs.set(i, edited);
+                return edited;
+            }
+        }
+        return null;
+    }
 
     // ---- DM poruke ----
     public StoredMessage saveDM(String a, String b, String sender, String text) {
@@ -132,7 +148,23 @@ public class MessageRepository {
         return null;
     }
 
-  
+    public StoredMessage editDMMessage(String a, String b, long id, String editor, String newText) {
+        String key = dmKey(a, b);
+        List<StoredMessage> msgs = dmMessages.getOrDefault(key, Collections.emptyList());
+        for (int i = 0; i < msgs.size(); i++) {
+            StoredMessage m = msgs.get(i);
+            if (m.getId() == id && m.getFromUser().equals(normalize(editor))) {
+                StoredMessage edited = StoredMessage.newBuilder(m)
+                        .setText(newText)
+                        .setEdited(true)
+                        .setTs(System.currentTimeMillis())
+                        .build();
+                msgs.set(i, edited);
+                return edited;
+            }
+        }
+        return null;
+    }
 
     // ---- BROADCAST poruke ----
     private final List<StoredMessage> broadcastMessages = new ArrayList<>();
@@ -161,7 +193,24 @@ public class MessageRepository {
         }
     }
 
-   
+    public StoredMessage editBroadcastMessage(long id, String editor, String newText) {
+        synchronized (broadcastMessages) {
+            for (int i = 0; i < broadcastMessages.size(); i++) {
+                StoredMessage m = broadcastMessages.get(i);
+                if (m.getId() == id && m.getFromUser().equals(normalize(editor))) {
+                    StoredMessage edited = StoredMessage.newBuilder(m)
+                            .setText(newText)
+                            .setEdited(true)
+                            .setTs(System.currentTimeMillis())
+                            .build();
+                    broadcastMessages.set(i, edited);
+                    return edited;
+                }
+            }
+            return null;
+        }
+    }
+
     // ---- MULTICAST poruke ----
     private final Map<Long, StoredMessage> multicastMessages = new ConcurrentHashMap<>();
     private final Map<Long, List<String>> multicastRecipients = new ConcurrentHashMap<>();
@@ -199,7 +248,19 @@ public class MessageRepository {
         return multicastRecipients.getOrDefault(id, List.of());
     }
 
-   
+    public StoredMessage editMulticastMessage(long id, String editor, String newText) {
+        StoredMessage orig = multicastMessages.get(id);
+        if (orig != null && orig.getFromUser().equals(normalize(editor))) {
+            StoredMessage edited = StoredMessage.newBuilder(orig)
+                    .setText(newText)
+                    .setEdited(true)
+                    .setTs(System.currentTimeMillis())
+                    .build();
+            multicastMessages.put(id, edited);
+            return edited;
+        }
+        return null;
+    }
 
     // -------------------- SOBE --------------------
     private final Map<String, Set<String>> roomMembers = new ConcurrentHashMap<>();

@@ -36,7 +36,6 @@ D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\proto
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\JoinRoomRequestOrBuilder.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\ListRoomsRequestOrBuilder.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\LeaveRoomRequestOrBuilder.java
-D:\Chat_application_gRPC\Chat_application_backend\src\main\java\rs\raf\pds\v4\z5\socket\SocketClientInteractive.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\EditMessageResponse.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\EditMessageRequestOrBuilder.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\ListInvitesRequest.java

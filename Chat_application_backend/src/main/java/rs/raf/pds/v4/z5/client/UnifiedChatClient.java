@@ -100,7 +100,15 @@ public class UnifiedChatClient {
             client.sendTCP(r);
         }
 
-        
+        void editDM(long id, String newText) {
+            CEditMessage m = new CEditMessage();
+            m.id = id;
+            m.fromUser = "";
+            m.room = "";
+            m.toUser = "";
+            m.newText = newText;
+            client.sendTCP(m);
+        }
 
         // ---------- Multicast ----------
         void sendMC(List<String> users, String text) {
@@ -119,7 +127,14 @@ public class UnifiedChatClient {
             client.sendTCP(r);
         }
 
-        
+        void editMC(long id, String newText) {
+            CEditMessage m = new CEditMessage();
+            m.id = id;
+            m.fromUser = "";
+            m.room = "#multicast";
+            m.newText = newText;
+            client.sendTCP(m);
+        }
 
         // ---------- Broadcast ----------
         void sendBC(String text) {
@@ -137,7 +152,15 @@ public class UnifiedChatClient {
             client.sendTCP(rb);
         }
 
-       
+        void sendEditBC(long id, String newText) {
+            CEditMessage m = new CEditMessage();
+            m.fromUser = "";
+            m.room     = "#broadcast";
+            m.id       = id;
+            m.newText  = newText;
+            m.toUser   = "";
+            client.sendTCP(m);
+        }
 
         void close() {
             try { client.stop(); } catch (Exception ignore) {}
@@ -190,7 +213,10 @@ public class UnifiedChatClient {
                     if (p.length < 3) continue;
                     socketClient.replyDM(Long.parseLong(p[1]), p[2]);
 
-                
+                } else if (line.startsWith("/edit-dm ")) {
+                    String[] p = line.split("\\s+", 3);
+                    if (p.length < 3) continue;
+                    socketClient.editDM(Long.parseLong(p[1]), p[2]);
 
                 } else if (line.startsWith("/mc ")) {
                     int sep = line.indexOf('|');
@@ -205,7 +231,11 @@ public class UnifiedChatClient {
                     if (p.length < 3) continue;
                     socketClient.replyMC(Long.parseLong(p[1]), p[2]);
 
-                  
+                } else if (line.startsWith("/edit-mc ")) {
+                    String[] p = line.split("\\s+", 3);
+                    if (p.length < 3) continue;
+                    socketClient.editMC(Long.parseLong(p[1]), p[2]);
+
                 } else if (line.startsWith("/bc ")) {
                     socketClient.sendBC(line.substring(4).trim());
 
@@ -214,7 +244,12 @@ public class UnifiedChatClient {
                     if (p.length < 3) continue;
                     socketClient.sendReplyBC(Long.parseLong(p[1]), p[2]);
 
-                
+                } else if (line.startsWith("/edit-bc ")) {
+                    String[] p = line.split("\\s+", 3);
+                    if (p.length < 3) continue;
+                    socketClient.sendEditBC(Long.parseLong(p[1]), p[2]);
+
+                // ----- gRPC commands (Rooms) -----
                 } else if (line.startsWith("/cr ")) {
                     String room = line.split("\\s+", 2)[1];
                     CreateRoomRequest req = CreateRoomRequest.newBuilder()
@@ -325,7 +360,18 @@ public class UnifiedChatClient {
                             " (odgovor na " + replyToId + " \"" + m.getReplyExcerpt() + "\")" +
                             ": " + m.getText());*/
 
-                
+                } else if (line.startsWith("/edit-msg ")) {
+                    String[] p = line.split("\\s+", 4);
+                    if (p.length < 4) continue;
+                    String room = p[1];
+                    long id = Long.parseLong(p[2]);
+                    String newText = p[3];
+                    EditMessageRequest req = EditMessageRequest.newBuilder()
+                            .setRoom(room).setId(id).setEditor(username).setNewText(newText).build();
+                    EditMessageResponse resp = stub.editMessage(req);
+                    StoredMessage m = resp.getMessage();
+                    /*System.out.println("[IZMENA] [soba:" + room + "] [" + m.getId() + "] " + m.getFromUser() +
+                            " (EDITED): " + m.getText());*/
                 } else if (line.startsWith("/more ")) {
                     String[] p = line.split("\\s+");
                     if (p.length < 3) continue;

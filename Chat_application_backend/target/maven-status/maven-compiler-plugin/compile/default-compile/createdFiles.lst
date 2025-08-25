@@ -27,7 +27,6 @@ rs\raf\pds\v4\z5\grpc\DMHistoryResponse$Builder.class
 rs\raf\pds\v4\z5\grpc\InviteUsersRequest$1.class
 rs\raf\pds\v4\z5\grpc\RespondInviteResponseOrBuilder.class
 rs\raf\pds\v4\z5\grpc\ListInvitesResponse.class
-rs\raf\pds\v4\z5\socket\SocketClientInteractive.class
 rs\raf\pds\v4\z5\grpc\MoreRoomRequest$1.class
 rs\raf\pds\v4\z5\grpc\ListInvitesRequest$1.class
 rs\raf\pds\v4\z5\grpc\SendRoomMessageResponse$1.class

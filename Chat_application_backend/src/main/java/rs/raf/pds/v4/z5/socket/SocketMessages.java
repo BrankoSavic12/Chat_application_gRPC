@@ -11,11 +11,11 @@ public class SocketMessages {
 
     // --- DM ---
     public static class CSendDM {
-        public String toUser;        // primalac (@korisnik)
-        public String fromUser;      // pošiljalac
+        public String toUser;       
+        public String fromUser;      
         public String text;
-        public long   replyToId;     // 0 ako nema reply
-        public String replyExcerpt;  // excerpt originala
+        public long   replyToId;     
+        public String replyExcerpt; 
     }
 
     public static class SDeliverDM {
@@ -30,38 +30,36 @@ public class SocketMessages {
     }
 
     public static class CReplyDM {
-        public String fromUser;   // ko šalje reply
-        public long   replyToId;  // ID poruke na koju se odgovara
-        public String text;       // tekst odgovora
+        public String fromUser;   
+        public long   replyToId;  
+        public String text;       
     }
 
     // --- MULTICAST ---
     public static class CSendMulticast {
         public String fromUser;
-        public ArrayList<String> toUsers; // svi primaoci
+        public ArrayList<String> toUsers; 
         public String text;
-        public long   replyToId;   // ako se odgovara na neku poruku
+        public long   replyToId;  
         public String replyExcerpt;
     }
 
-    /**
-     * Multicast sada tretiramo kao jednu poruku (jedan id) sa listom primaoca.
-     */
+   
     public static class SDeliverMulticast {
-        public long   id;                 // jedinstveni ID multicast poruke
+        public long   id;          
         public String fromUser;
         public String text;
         public long   tsEpochMs;
         public boolean edited;
         public long   replyToId;
         public String replyExcerpt;
-        public ArrayList<String> deliveredTo; // svi primaoci
+        public ArrayList<String> deliveredTo; 
     }
 
     public static class CReplyMulticast {
-        public String fromUser;   // ko šalje reply
-        public long   replyToId;  // ID multicast poruke
-        public String text;       // tekst odgovora
+        public String fromUser; 
+        public long   replyToId; 
+        public String text;      
     }
 
     // --- BROADCAST ---
@@ -75,15 +73,15 @@ public class SocketMessages {
         public String fromUser;
         public String text;
         public long   tsEpochMs;
-        public boolean edited;      // ako je editovana poruka
-        public long   replyToId;    // ako je neko odgovorio na nju
-        public String replyExcerpt; // isecak originalne poruke
+        public boolean edited;     
+        public long   replyToId;   
+        public String replyExcerpt; 
     }
 
     public static class CReplyBroadcast {
-        public String fromUser;   // ko šalje reply
-        public long   replyToId;  // ID broadcast poruke
-        public String text;       // tekst odgovora
+        public String fromUser;  
+        public long   replyToId;  
+        public String text;     
     }
 
     // --- GROUP MSG ---
@@ -106,17 +104,35 @@ public class SocketMessages {
         public String replyExcerpt;
     }
 
-    // Reply u okviru sobe
+  
     public static class CReplyGroupMsg {
-        public String fromUser;   // ko šalje reply
-        public String room;       // soba
-        public long   replyToId;  // ID poruke na koju se odgovara
-        public String text;       // tekst odgovora
+        public String fromUser;   
+        public String room;       
+        public long   replyToId; 
+        public String text;     
     }
 
+    // --- EDIT MSG ---
+    public static class CEditMessage {
+        public long   id;
+    
+        public String room;
+        public String fromUser;
+        public String toUser;  
+        public String newText;
+    }
 
+    public static class SDeliverEditedMessage {
+        public long   id;
+        public String room;    
+        public String fromUser;
+        public String text;
+        public long   tsEpochMs;
+        public boolean edited;
+        public long   replyToId;
+        public String replyExcerpt;
+    }
 
- 
     // --- INVITE ---
     public static class SInvite {
         public String room;
