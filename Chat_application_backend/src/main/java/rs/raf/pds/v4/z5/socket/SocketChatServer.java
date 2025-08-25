@@ -172,20 +172,6 @@ public class SocketChatServer {
         for (Connection target : user2conn.values()) target.sendTCP(out);
     }
 
-    private void handleReplyBroadcast(Connection conn, CReplyBroadcast m) {
-        String from = sessionOr(conn2user.get(conn), m.fromUser);
-
-        StoredMessage original = repo.findBroadcastMessageById(m.replyToId);
-        if (original == null) return;
-
-        String to = original.getFromUser();
-        StoredMessage saved = repo.saveDM(from, to, from, m.text, original.getId(), excerpt(original.getText()));
-
-        SDeliverDM out = toDM(saved, from, to);
-        Connection tconn = user2conn.get(to);
-        if (tconn != null) tconn.sendTCP(out);
-        conn.sendTCP(out);
-    }
 
     private void handleGroupMsg(Connection conn, CSendGroupMsg m) {
         String from = sessionOr(conn2user.get(conn), m.fromUser);
@@ -195,36 +181,8 @@ public class SocketChatServer {
         deliverGroupMessage(saved);
     }
 
-    private void handleReplyGroupMsg(Connection conn, CReplyGroupMsg m) {
-        String from = sessionOr(conn2user.get(conn), m.fromUser);
 
-        StoredMessage orig = repo.findById(m.room, m.replyToId);
-        if (orig == null) return;
-
-        String excerpt = excerpt(orig.getText());
-        StoredMessage saved = repo.saveRoomMessage(m.room, from, m.text, orig.getId(), excerpt);
-
-        deliverGroupMessage(saved);
-    }
-
-    private void handleEdit(Connection conn, CEditMessage m) {
-        String from = sessionOr(conn2user.get(conn), m.fromUser);
-        StoredMessage updated = null;
-
-        if ("#broadcast".equals(m.room)) {
-            updated = repo.editBroadcastMessage(m.id, from, m.newText);
-        } else if ("#multicast".equals(m.room)) {
-            updated = repo.editMulticastMessage(m.id, from, m.newText);
-        } else if (m.room != null && !m.room.isEmpty()) {
-            updated = repo.editRoomMessage(m.room, m.id, from, m.newText);
-        } else {
-            StoredMessage orig = repo.findDMByIdGlobal(m.id);
-            if (orig != null) {
-                String partner = extractPartnerFromKey(orig.getRoom(), from);
-                updated = repo.editDMMessage(from, partner, m.id, from, m.newText);
-            }
-        }
-
+   
         if (updated == null) return;
 
         SDeliverEditedMessage out = new SDeliverEditedMessage();
