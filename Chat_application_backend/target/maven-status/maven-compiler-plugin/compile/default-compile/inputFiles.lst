@@ -1,4 +1,5 @@
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\SendRoomMessageResponse.java
+D:\Chat_application_gRPC\Chat_application_backend\src\main\java\rs\raf\pds\v4\z5\server\ServerMain.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\PendingInvite.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\JoinRoomResponseOrBuilder.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\SendMulticastResponse.java
@@ -14,6 +15,8 @@ D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\proto
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\SendRoomMessageRequest.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\InviteUsersRequest.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\ChatControlProto.java
+D:\Chat_application_gRPC\Chat_application_backend\src\main\java\rs\raf\pds\v4\z5\server\ChatControlServiceImpl.java
+D:\Chat_application_gRPC\Chat_application_backend\src\main\java\rs\raf\pds\v4\z5\client\UnifiedChatClient.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\SendRoomMessageResponseOrBuilder.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\RespondInviteResponse.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\ListRoomsRequest.java
@@ -37,6 +40,7 @@ D:\Chat_application_gRPC\Chat_application_backend\src\main\java\rs\raf\pds\v4\z5
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\EditMessageResponse.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\EditMessageRequestOrBuilder.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\ListInvitesRequest.java
+D:\Chat_application_gRPC\Chat_application_backend\src\main\java\rs\raf\pds\v4\z5\store\ChatRepository.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\MoreRoomResponseOrBuilder.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\MoreRoomResponse.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\RespondInviteRequest.java
@@ -44,10 +48,12 @@ D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\proto
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\StoredMessageOrBuilder.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\RespondInviteRequestOrBuilder.java
 D:\Chat_application_gRPC\Chat_application_backend\src\main\java\rs\raf\pds\v4\z5\socket\SocketChatServer.java
+D:\Chat_application_gRPC\Chat_application_backend\src\main\java\rs\raf\pds\v4\z5\client\ClientMain.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\EditMessageRequest.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\MoreRoomRequest.java
 D:\Chat_application_gRPC\Chat_application_backend\src\main\java\rs\raf\pds\v4\z5\socket\KryoUtil.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\SendMulticastRequestOrBuilder.java
+D:\Chat_application_gRPC\Chat_application_backend\src\main\java\rs\raf\pds\v4\z5\store\MessageRepository.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\PendingInviteOrBuilder.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\RespondInviteResponseOrBuilder.java
 D:\Chat_application_gRPC\Chat_application_backend\target\generated-sources\protobuf\java\rs\raf\pds\v4\z5\grpc\DMHistoryResponseOrBuilder.java

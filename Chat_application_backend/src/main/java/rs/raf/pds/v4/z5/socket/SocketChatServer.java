@@ -172,6 +172,20 @@ public class SocketChatServer {
         for (Connection target : user2conn.values()) target.sendTCP(out);
     }
 
+    private void handleReplyBroadcast(Connection conn, CReplyBroadcast m) {
+        String from = sessionOr(conn2user.get(conn), m.fromUser);
+
+        StoredMessage original = repo.findBroadcastMessageById(m.replyToId);
+        if (original == null) return;
+
+        String to = original.getFromUser();
+        StoredMessage saved = repo.saveDM(from, to, from, m.text, original.getId(), excerpt(original.getText()));
+
+        SDeliverDM out = toDM(saved, from, to);
+        Connection tconn = user2conn.get(to);
+        if (tconn != null) tconn.sendTCP(out);
+        conn.sendTCP(out);
+    }
 
     private void handleGroupMsg(Connection conn, CSendGroupMsg m) {
         String from = sessionOr(conn2user.get(conn), m.fromUser);
@@ -181,43 +195,19 @@ public class SocketChatServer {
         deliverGroupMessage(saved);
     }
 
+    private void handleReplyGroupMsg(Connection conn, CReplyGroupMsg m) {
+        String from = sessionOr(conn2user.get(conn), m.fromUser);
+
+        StoredMessage orig = repo.findById(m.room, m.replyToId);
+        if (orig == null) return;
+
+        String excerpt = excerpt(orig.getText());
+        StoredMessage saved = repo.saveRoomMessage(m.room, from, m.text, orig.getId(), excerpt);
+
+        deliverGroupMessage(saved);
+    }
 
    
-        if (updated == null) return;
-
-        SDeliverEditedMessage out = new SDeliverEditedMessage();
-        out.id = updated.getId();
-        out.room = updated.getRoom();
-        out.fromUser = from;
-        out.text = updated.getText();
-        out.tsEpochMs = updated.getTs();
-        out.edited = true;
-        out.replyToId = updated.getReplyToId();
-        out.replyExcerpt = updated.getReplyExcerpt();
-
-        if ("#broadcast".equals(updated.getRoom())) {
-            for (Connection target : user2conn.values()) target.sendTCP(out);
-        } else if ("#multicast".equals(updated.getRoom())) {
-            for (String u : repo.getMulticastRecipients(updated.getId())) {
-                Connection t = user2conn.get(u);
-                if (t != null) t.sendTCP(out);
-            }
-            Connection f = user2conn.get(from);
-            if (f != null) f.sendTCP(out);
-        } else if (updated.getRoom() != null && updated.getRoom().contains("|")) {
-            String[] parts = updated.getRoom().split("\\|");
-            for (String u : parts) {
-                Connection t = user2conn.get(u);
-                if (t != null) t.sendTCP(out);
-            }
-        } else {
-            Set<String> members = roomMembers.getOrDefault(updated.getRoom(), Set.of());
-            for (String member : members) {
-                Connection target = user2conn.get(member);
-                if (target != null) target.sendTCP(out);
-            }
-        }
-    }
 
     // --------- utils ----------
     private static String normUser(String u) {

@@ -67,7 +67,7 @@ public class MessageRepository {
                 .stream().filter(m -> m.getId() == id).findFirst().orElse(null);
     }
 
-   
+
     // ---- DM poruke ----
     public StoredMessage saveDM(String a, String b, String sender, String text) {
         return saveDM(a, b, sender, text, 0, null);
@@ -132,7 +132,11 @@ public class MessageRepository {
         return null;
     }
 
-   
+  
+
+    // ---- BROADCAST poruke ----
+    private final List<StoredMessage> broadcastMessages = new ArrayList<>();
+
     public StoredMessage saveBroadcastMessage(String sender, String text) {
         StoredMessage msg = StoredMessage.newBuilder()
                 .setId(idGen.getAndIncrement())
@@ -157,7 +161,7 @@ public class MessageRepository {
         }
     }
 
-  
+   
     // ---- MULTICAST poruke ----
     private final Map<Long, StoredMessage> multicastMessages = new ConcurrentHashMap<>();
     private final Map<Long, List<String>> multicastRecipients = new ConcurrentHashMap<>();
@@ -195,7 +199,7 @@ public class MessageRepository {
         return multicastRecipients.getOrDefault(id, List.of());
     }
 
-  
+   
 
     // -------------------- SOBE --------------------
     private final Map<String, Set<String>> roomMembers = new ConcurrentHashMap<>();

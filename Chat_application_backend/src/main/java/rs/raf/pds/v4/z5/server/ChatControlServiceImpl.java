@@ -160,31 +160,7 @@ public class ChatControlServiceImpl extends ChatControlGrpc.ChatControlImplBase 
         responseObserver.onCompleted();
     }
 
-    @Override
-    public void editMessage(EditMessageRequest request, StreamObserver<EditMessageResponse> responseObserver) {
-        String editor = normUser(request.getEditor());
-        long id = request.getId();
-        String newText = request.getNewText();
 
-        if (request.getRoom() == null || request.getRoom().isEmpty()) {
-            responseObserver.onError(new IllegalArgumentException("Editing is supported only for rooms via gRPC"));
-            return;
-        }
-
-        String room = normRoom(request.getRoom());
-        StoredMessage edited = repo.editRoomMessage(room, id, editor, newText);
-
-        if (edited == null) {
-            responseObserver.onError(new IllegalArgumentException("Message not found or permission denied"));
-            return;
-        }
-
-        socket.deliverGroupMessage(edited);
-
-        EditMessageResponse resp = EditMessageResponse.newBuilder().setMessage(edited).build();
-        responseObserver.onNext(resp);
-        responseObserver.onCompleted();
-    }
 
     @Override
     public void leaveRoom(LeaveRoomRequest request, StreamObserver<LeaveRoomResponse> responseObserver) {

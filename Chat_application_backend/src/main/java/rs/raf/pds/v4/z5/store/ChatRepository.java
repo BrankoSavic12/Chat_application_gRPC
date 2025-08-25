@@ -104,7 +104,60 @@ public class ChatRepository {
         return null;
     }
 
-   
+    
+    
+    // ----------------- DM -----------------
+    public StoredMessage appendDM(String fromUser, String toUser, String text) {
+        String key = dmKey(fromUser, toUser);
+        long id = dmSeq.computeIfAbsent(key, k -> new AtomicLong(0)).incrementAndGet();
+
+        StoredMessage msg = StoredMessage.newBuilder()
+                .setId(id)
+                .setRoom("") // prazno = DM
+                .setFromUser(normUser(fromUser))
+                .setText(text)
+                .setTs(System.currentTimeMillis())
+                .setEdited(false)
+                .build();
+
+        dmMessages.computeIfAbsent(key, k -> new ConcurrentLinkedDeque<>()).addLast(msg);
+        return msg;
+    }
+
+    public List<StoredMessage> lastNDM(String u1, String u2, int n) {
+        String key = dmKey(u1, u2);
+        Deque<StoredMessage> dq = dmMessages.get(key);
+        if (dq == null || dq.isEmpty()) return Collections.emptyList();
+        ArrayList<StoredMessage> out = new ArrayList<>(Math.min(n, dq.size()));
+        Iterator<StoredMessage> it = dq.descendingIterator();
+        while (it.hasNext() && out.size() < n) out.add(it.next());
+        Collections.reverse(out);
+        return out;
+    }
+
+    public StoredMessage editDMMessage(String u1, String u2, long id, String editor, String newText) {
+        String key = dmKey(u1, u2);
+        Deque<StoredMessage> dq = dmMessages.get(key);
+        if (dq == null) return null;
+
+        List<StoredMessage> list = new ArrayList<>(dq);
+        for (int i = 0; i < list.size(); i++) {
+            StoredMessage m = list.get(i);
+            if (m.getId() == id && m.getFromUser().equals(normUser(editor))) {
+                StoredMessage edited = StoredMessage.newBuilder(m)
+                        .setText(newText)
+                        .setEdited(true)
+                        .setTs(System.currentTimeMillis())
+                        .build();
+                list.set(i, edited);
+                dq.clear();
+                dq.addAll(list);
+                return edited;
+            }
+        }
+        return null;
+    }
+
     // ----------------- BROADCAST -----------------
     public StoredMessage saveBroadcastMessage(String sender, String text) {
         long id = roomSeq.computeIfAbsent(BROADCAST_ROOM, k -> new AtomicLong(0)).incrementAndGet();

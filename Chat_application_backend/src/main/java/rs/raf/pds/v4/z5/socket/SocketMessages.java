@@ -114,30 +114,9 @@ public class SocketMessages {
         public String text;       // tekst odgovora
     }
 
-    // --- EDIT MSG ---
-    public static class CEditMessage {
-        public long   id;
-        /**
-         * "#broadcast" ili "#multicast" ili naziv sobe.
-         * "" znači DM (direktna poruka).
-         */
-        public String room;
-        public String fromUser;
-        public String toUser;    // za DM
-        public String newText;
-    }
 
-    public static class SDeliverEditedMessage {
-        public long   id;
-        public String room;      // "#broadcast", "#multicast", soba ili "" => DM
-        public String fromUser;
-        public String text;
-        public long   tsEpochMs;
-        public boolean edited;
-        public long   replyToId;
-        public String replyExcerpt;
-    }
 
+ 
     // --- INVITE ---
     public static class SInvite {
         public String room;

@@ -100,15 +100,7 @@ public class UnifiedChatClient {
             client.sendTCP(r);
         }
 
-        void editDM(long id, String newText) {
-            CEditMessage m = new CEditMessage();
-            m.id = id;
-            m.fromUser = "";
-            m.room = "";
-            m.toUser = "";
-            m.newText = newText;
-            client.sendTCP(m);
-        }
+        
 
         // ---------- Multicast ----------
         void sendMC(List<String> users, String text) {
@@ -127,14 +119,7 @@ public class UnifiedChatClient {
             client.sendTCP(r);
         }
 
-        void editMC(long id, String newText) {
-            CEditMessage m = new CEditMessage();
-            m.id = id;
-            m.fromUser = "";
-            m.room = "#multicast";
-            m.newText = newText;
-            client.sendTCP(m);
-        }
+        
 
         // ---------- Broadcast ----------
         void sendBC(String text) {
@@ -152,15 +137,7 @@ public class UnifiedChatClient {
             client.sendTCP(rb);
         }
 
-        void sendEditBC(long id, String newText) {
-            CEditMessage m = new CEditMessage();
-            m.fromUser = "";
-            m.room     = "#broadcast";
-            m.id       = id;
-            m.newText  = newText;
-            m.toUser   = "";
-            client.sendTCP(m);
-        }
+       
 
         void close() {
             try { client.stop(); } catch (Exception ignore) {}
@@ -213,10 +190,7 @@ public class UnifiedChatClient {
                     if (p.length < 3) continue;
                     socketClient.replyDM(Long.parseLong(p[1]), p[2]);
 
-                } else if (line.startsWith("/edit-dm ")) {
-                    String[] p = line.split("\\s+", 3);
-                    if (p.length < 3) continue;
-                    socketClient.editDM(Long.parseLong(p[1]), p[2]);
+                
 
                 } else if (line.startsWith("/mc ")) {
                     int sep = line.indexOf('|');
@@ -231,11 +205,7 @@ public class UnifiedChatClient {
                     if (p.length < 3) continue;
                     socketClient.replyMC(Long.parseLong(p[1]), p[2]);
 
-                } else if (line.startsWith("/edit-mc ")) {
-                    String[] p = line.split("\\s+", 3);
-                    if (p.length < 3) continue;
-                    socketClient.editMC(Long.parseLong(p[1]), p[2]);
-
+                  
                 } else if (line.startsWith("/bc ")) {
                     socketClient.sendBC(line.substring(4).trim());
 
@@ -244,12 +214,7 @@ public class UnifiedChatClient {
                     if (p.length < 3) continue;
                     socketClient.sendReplyBC(Long.parseLong(p[1]), p[2]);
 
-                } else if (line.startsWith("/edit-bc ")) {
-                    String[] p = line.split("\\s+", 3);
-                    if (p.length < 3) continue;
-                    socketClient.sendEditBC(Long.parseLong(p[1]), p[2]);
-
-                // ----- gRPC commands (Rooms) -----
+                
                 } else if (line.startsWith("/cr ")) {
                     String room = line.split("\\s+", 2)[1];
                     CreateRoomRequest req = CreateRoomRequest.newBuilder()
@@ -277,10 +242,126 @@ public class UnifiedChatClient {
                                 ": " + m.getText() +
                                 (m.getReplyToId() > 0 ? " [reply to " + m.getReplyToId() + " → \"" + m.getReplyExcerpt() + "\"]" : "")
                         );
-                    
-
                     }
+
+                } else if (line.startsWith("/invite ")) {
+                    String[] parts = line.split("\\s+");
+                    if (parts.length < 3) continue;
+                    String room = parts[1];
+                    List<String> users = Arrays.asList(Arrays.copyOfRange(parts, 2, parts.length));
+                    InviteUsersRequest req = InviteUsersRequest.newBuilder()
+                            .setRoom(room).addAllUsers(users).build();
+                    stub.inviteUsers(req);
+                    System.out.println("[POZIV] Pozvali ste korisnike " + users + " u sobu " + room);
+
+                } else if (line.startsWith("/invites")) {
+                    ListInvitesRequest req = ListInvitesRequest.newBuilder().setUser(username).build();
+                    ListInvitesResponse resp = stub.listInvites(req);
+                    if (resp.getInvitesCount() == 0) {
+                        System.out.println("[INFO] Nemate novih poziva.");
+                    } else {
+                        System.out.println("[INVITES] Pozivi koje ste dobili:");
+                        for (PendingInvite inv : resp.getInvitesList()) {
+                            System.out.println(" - u sobu " + inv.getRoom() + ", poslao " + inv.getInvitedBy());
+                        }
+                    }
+
+                } else if (line.startsWith("/accept ")) {
+                    String room = line.split("\\s+", 2)[1];
+
+                    // 1. prihvati poziv
+                    RespondInviteRequest req = RespondInviteRequest.newBuilder()
+                            .setUser(username).setRoom(room).setAccept(true).build();
+                    stub.respondInvite(req);
+
+                    // 2. odmah se pridruži sobi da povuče poslednje poruke
+                    JoinRoomRequest joinReq = JoinRoomRequest.newBuilder()
+                            .setRoom(room).setUser(username).build();
+                    JoinRoomResponse joinResp = stub.joinRoom(joinReq);
+
+                    // 3. ispiši poruku i poslednjih 10
+                    System.out.println("[OK] Prihvatili ste poziv i pridružili se sobi " + room);
+                    for (StoredMessage m : joinResp.getLast10List()) {
+                        System.out.println("[soba:" + room + "] [" + m.getId() + "] " + m.getFromUser() +
+                                (m.getEdited() ? " (EDITED)" : "") +
+                                ": " + m.getText() +
+                                (m.getReplyToId() > 0 ? " [odgovor na " + m.getReplyToId() + " → \"" + m.getReplyExcerpt() + "\"]" : "")
+                        );
+                    }
+                
+
+                } else if (line.startsWith("/reject ")) {
+                    String room = line.split("\\s+", 2)[1];
+                    RespondInviteRequest req = RespondInviteRequest.newBuilder()
+                            .setUser(username).setRoom(room).setAccept(false).build();
+                    stub.respondInvite(req);
+                    System.out.println("[X] Odbili ste poziv za sobu " + room);
+
+                } else if (line.startsWith("/room-msg ")) {
+                    int sep = line.indexOf('|');
+                    if (sep == -1) continue;
+                    String[] head = line.substring(0, sep).trim().split("\\s+");
+                    if (head.length < 2) continue;
+                    String room = head[1];
+                    String text = line.substring(sep + 1).trim();
+
+                    SendRoomMessageRequest req = SendRoomMessageRequest.newBuilder()
+                            .setRoom(room).setFromUser(username).setText(text).build();
+                    SendRoomMessageResponse resp = stub.sendRoomMessage(req);
+                    StoredMessage m = resp.getMessage();
+                    //System.out.println("[soba:" + room + "] [" + m.getId() + "] " + m.getFromUser() + ": " + m.getText());
+
+                } else if (line.startsWith("/reply-msg ")) {
+                    String[] p = line.split("\\s+", 4);
+                    if (p.length < 4) continue;
+                    String room = p[1];
+                    long replyToId = Long.parseLong(p[2]);
+                    String text = p[3];
+                    SendRoomMessageRequest req = SendRoomMessageRequest.newBuilder()
+                            .setRoom(room).setFromUser(username).setText(text).setReplyToId(replyToId).build();
+                    SendRoomMessageResponse resp = stub.sendRoomMessage(req);
+                    StoredMessage m = resp.getMessage();
+                    /*System.out.println("[soba:" + room + "] [" + m.getId() + "] " + m.getFromUser() +
+                            " (odgovor na " + replyToId + " \"" + m.getReplyExcerpt() + "\")" +
+                            ": " + m.getText());*/
+
+                
+                } else if (line.startsWith("/more ")) {
+                    String[] p = line.split("\\s+");
+                    if (p.length < 3) continue;
+                    String room = p[1];
+                    long beforeId = Long.parseLong(p[2]);
+                    MoreRoomRequest req = MoreRoomRequest.newBuilder()
+                            .setRoom(room).setBeforeId(beforeId).setCount(5).build();
+                    MoreRoomResponse resp = stub.getMoreRoom(req);
+                    for (StoredMessage m : resp.getMessagesList()) {
+                        System.out.println("[soba:" + room + "] [" + m.getId() + "] " + m.getFromUser() +
+                                (m.getEdited() ? " (EDITED)" : "") +
+                                ": " + m.getText() +
+                                (m.getReplyToId() > 0 ? " [reply to " + m.getReplyToId() + " → \"" + m.getReplyExcerpt() + "\"]" : "")
+                        );
+                    }
+
+                } else if (line.startsWith("/leave ")) {
+                    String room = line.split("\\s+", 2)[1];
+                    LeaveRoomRequest req = LeaveRoomRequest.newBuilder()
+                            .setRoom(room).setUser(username).build();
+                    LeaveRoomResponse resp = stub.leaveRoom(req);
+                    if (resp.getSuccess()) {
+                        System.out.println("[NAPUSTANJE] Napustili ste sobu " + room);
+                    } else {
+                        System.out.println("[INFO] Niste clan sobe " + room);
+                    }
+
+                } else {
+                    System.out.println("Nepoznata komanda: " + line);
+                }
+            } catch (Exception e) {
+                System.err.println("Greška: " + e.getMessage());
             }
+        }
+    }
+
     private void shutdown() {
         System.out.println("Gašenje klijenta...");
         socketClient.close();
